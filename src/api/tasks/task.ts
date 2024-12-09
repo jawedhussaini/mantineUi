@@ -29,7 +29,7 @@ export const createTask = async (
 	} catch (error) {
 		const errorMessage =
 			(error as any).response?.data?.error?.message || "Failed to create task";
-		throw new Error(errorMessage);
+		return { errors: errorMessage };
 	}
 };
 
@@ -68,7 +68,7 @@ export const getTasks = async (
 	} catch (error) {
 		const errorMessage =
 			(error as any).response?.data?.error?.message || "Failed to fetch tasks";
-		throw new Error(errorMessage);
+		return { errors: errorMessage };
 	}
 };
 export const getTasksByUser = async (userId?: string) => {
@@ -83,7 +83,7 @@ export const getTasksByUser = async (userId?: string) => {
 	} catch (error) {
 		const errorMessage =
 			(error as any).response?.data?.error?.message || "Failed to fetch tasks";
-		throw new Error(errorMessage);
+		return { errors: errorMessage };
 	}
 };
 
@@ -101,7 +101,7 @@ export const getTask = async (id: string) => {
 	} catch (error) {
 		const errorMessage =
 			(error as any).response?.data?.error?.message || "Failed to fetch task";
-		throw new Error(errorMessage);
+		return { errors: errorMessage };
 	}
 };
 
@@ -123,7 +123,7 @@ export const updateTask = async (
 	} catch (error) {
 		const errorMessage =
 			(error as any).response?.data?.error?.message || "Failed to update task";
-		throw new Error(errorMessage);
+		return { errors: errorMessage };
 	}
 };
 
@@ -138,6 +138,6 @@ export const deleteTask = async (id: string) => {
 	} catch (error) {
 		const errorMessage =
 			(error as any).response?.data?.error?.message || "Failed to delete task";
-		throw new Error(errorMessage);
+		return { errors: errorMessage };
 	}
 };

@@ -22,15 +22,25 @@ const useReplayStore = create<ReplayState>((set) => ({
 
 	addReplay: async (taskId: string, content: string, userId: string) => {
 		set({ loadings: true, error: null });
-		try {
-			const newReplay = await createReplay(taskId, content, userId);
-			set((state) => ({
-				replays: [...state.replays, newReplay],
+
+		const newReplay = await createReplay(taskId, content, userId);
+
+		if (!newReplay) {
+			set({
 				loadings: false,
-			}));
-		} catch (error) {
-			set({ loadings: false, error: (error as Error).message });
+				error: "failed to send replay",
+			});
 		}
+		if (newReplay?.errors) {
+			set({
+				loadings: false,
+				error: newReplay.error,
+			});
+		}
+		set((state) => ({
+			replays: [...state.replays, newReplay],
+			loadings: false,
+		}));
 	},
 
 	fetchReplays: async (
@@ -38,94 +48,131 @@ const useReplayStore = create<ReplayState>((set) => ({
 		userId: string | undefined
 	) => {
 		set({ loadings: true, error: null });
-		try {
-			const response = await getReplaysByTask(taskId, userId);
-			const replays =
-				response?.data?.map((replay: any) => ({
-					id: replay.id,
-					content: replay.attributes?.answer,
-					task: replay.attributes?.task?.data
-						? {
-								id: replay.attributes?.task?.data?.id,
-								title: replay.attributes?.task?.data?.attributes?.Title,
-						  }
-						: undefined,
-					user: replay.attributes?.user?.data
-						? {
-								username: replay.attributes?.user?.data?.attributes?.username,
-								email: replay.attributes?.user?.data?.attributes?.email,
-						  }
-						: undefined,
-					createdAt: replay.attributes?.createdAt,
-				})) || [];
 
+		const response = await getReplaysByTask(taskId, userId);
+		if (!response) {
 			set({
-				replays,
-				totalPages: response?.meta?.pagination?.pageCount || 1,
 				loadings: false,
+				error: "Failed to fetch replays",
 			});
-		} catch (error) {
-			set({ loadings: false, error: (error as Error).message });
 		}
+		if (response?.errors) {
+			set({
+				loadings: false,
+				error: response.error,
+			});
+		}
+		const replays =
+			response?.data?.map((replay: any) => ({
+				id: replay.id,
+				content: replay.attributes?.answer,
+				task: replay.attributes?.task?.data
+					? {
+							id: replay.attributes?.task?.data?.id,
+							title: replay.attributes?.task?.data?.attributes?.Title,
+					  }
+					: undefined,
+				user: replay.attributes?.user?.data
+					? {
+							username: replay.attributes?.user?.data?.attributes?.username,
+							email: replay.attributes?.user?.data?.attributes?.email,
+					  }
+					: undefined,
+				createdAt: replay.attributes?.createdAt,
+			})) || [];
+
+		set({
+			replays,
+			totalPages: response?.meta?.pagination?.pageCount || 1,
+			loadings: false,
+		});
 	},
 
 	fetchReplay: async (id: string) => {
 		set({ loadings: true, error: null });
-		try {
-			const replay = await getReplayByUserId(id);
-			const replays =
-				replay?.data?.map((replay: any) => ({
-					id: replay.id,
-					content: replay.attributes?.answer,
-					task: replay.attributes?.task?.data
-						? {
-								id: replay.attributes?.task?.data?.id,
-								title: replay.attributes?.task?.data?.attributes?.Title,
-						  }
-						: undefined,
-					user: replay.attributes?.user?.data
-						? {
-								username: replay.attributes?.user?.data?.attributes?.username,
-								email: replay.attributes?.user?.data?.attributes?.email,
-						  }
-						: undefined,
-					createdAt: replay.attributes?.createdAt,
-				})) || [];
+
+		const replay = await getReplayByUserId(id);
+
+		if (!replay) {
 			set({
-				replays,
 				loadings: false,
+				error: "Failed to fetch replays",
 			});
-		} catch (error) {
-			set({ loadings: false, error: (error as Error).message });
 		}
+		if (replay?.errors) {
+			set({
+				loadings: false,
+				error: replay.error,
+			});
+		}
+		const replays =
+			replay?.data?.map((replay: any) => ({
+				id: replay.id,
+				content: replay.attributes?.answer,
+				task: replay.attributes?.task?.data
+					? {
+							id: replay.attributes?.task?.data?.id,
+							title: replay.attributes?.task?.data?.attributes?.Title,
+					  }
+					: undefined,
+				user: replay.attributes?.user?.data
+					? {
+							username: replay.attributes?.user?.data?.attributes?.username,
+							email: replay.attributes?.user?.data?.attributes?.email,
+					  }
+					: undefined,
+				createdAt: replay.attributes?.createdAt,
+			})) || [];
+		set({
+			replays,
+			loadings: false,
+		});
 	},
 
 	updateReplay: async (id: string, content: string) => {
 		set({ loadings: true, error: null });
-		try {
-			const updatedReplay = await updateReplay(id, content);
-			set((state) => ({
-				replays: state.replays.map((replay) =>
-					replay.id === updatedReplay.id ? updatedReplay : replay
-				),
+
+		const updatedReplay = await updateReplay(id, content);
+		if (!updatedReplay) {
+			set({
 				loadings: false,
-			}));
-		} catch (error) {
-			set({ loadings: false, error: (error as Error).message });
+				error: "Failed to update replay",
+			});
 		}
+		if (updatedReplay?.errors) {
+			set({
+				loadings: false,
+				error: updatedReplay.error,
+			});
+		}
+		set((state) => ({
+			replays: state.replays.map((replay) =>
+				replay.id === updatedReplay.id ? updatedReplay : replay
+			),
+			loadings: false,
+		}));
 	},
 
 	deleteReplay: async (id: string) => {
 		set({ loadings: true, error: null });
-		try {
-			await deleteReplay(id);
-			set((state) => ({
-				replays: state.replays.filter((replay) => replay.id !== id),
+
+		const deletedReplay = await deleteReplay(id);
+		if (!deleteReplay) {
+			set({
 				loadings: false,
-			}));
-		} catch (error) {
-			set({ loadings: false, error: (error as Error).message });
+				error: "Failed to delete replay",
+			});
 		}
+		if (deletedReplay?.errors) {
+			set({
+				loadings: false,
+				error: deletedReplay.error,
+			});
+		}
+		set((state) => ({
+			replays: state.replays.filter((replay) => replay.id !== id),
+			loadings: false,
+		}));
 	},
 }));
 

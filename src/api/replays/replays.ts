@@ -1,6 +1,5 @@
 import { getAuthToken } from "@/Data/Service/getToken";
 import axios from "axios";
-import Cookie from "js-cookie";
 
 const STRAPI_URL =
 	process.env.STRAPI_URL || "https://mantineadminpanal.onrender.com/api";
@@ -23,7 +22,7 @@ export const createReplay = async (
 		const errorMessage =
 			(error as any).response?.data?.error?.message ||
 			"Failed to create replay";
-		throw new Error(errorMessage);
+		return { errors: errorMessage };
 	}
 };
 
@@ -50,7 +49,7 @@ export const getReplaysByTask = async (
 		const errorMessage =
 			(error as any).response?.data?.error?.message ||
 			"Failed to fetch replays";
-		throw new Error(errorMessage);
+		return { errors: errorMessage };
 	}
 };
 
@@ -71,7 +70,7 @@ export const getReplayByUserId = async (id: string) => {
 	} catch (error) {
 		const errorMessage =
 			(error as any).response?.data?.error?.message || "Failed to fetch replay";
-		throw new Error(errorMessage);
+		return { errors: errorMessage };
 	}
 };
 
@@ -89,7 +88,7 @@ export const updateReplay = async (id: string, content: string) => {
 		const errorMessage =
 			(error as any).response?.data?.error?.message ||
 			"Failed to update replay";
-		throw new Error(errorMessage);
+		return { errors: errorMessage };
 	}
 };
 
@@ -105,6 +104,6 @@ export const deleteReplay = async (id: string) => {
 		const errorMessage =
 			(error as any).response?.data?.error?.message ||
 			"Failed to delete replay";
-		throw new Error(errorMessage);
+		return { errors: errorMessage };
 	}
 };
